@@ -56,7 +56,7 @@ One MCP server that gives Claude Code both the knowledge **and** the execution p
 | **Android CLI** | 5 | Scaffold, lint, render @Preview, deploy APK, live dep versions |
 | **Execution** | 4 | Direct adb, git, gradle, and shell command execution |
 
-## Tools (23 total)
+## Tools (24 total)
 
 ### Knowledge Layer (14)
 | Tool | Returns |

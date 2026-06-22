@@ -7,7 +7,24 @@
       "Bash(gh --version)",
       "Bash(npm install *)",
       "Bash(npm run *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(gh repo *)",
+      "Bash(git push *)",
+      "Bash(git remote *)",
+      "Read(//Users/pushpeetsingh/.config/gh/**)",
+      "Bash(git config *)",
+      "Bash(git tag *)",
+      "Bash(gh run *)",
+      "Bash(gh api *)",
+      "Bash(gh release *)",
+      "Bash(cat \"/Users/pushpeetsingh/Library/Application Support/Claude/claude_desktop_config.json\" 2>/dev/null)",
+      "Read(//Users/pushpeetsingh/Library/Application Support/Claude/**)",
+      "Bash(npm link *)",
+      "Bash(android-dev-mcp --help)",
+      "Bash(android-dev-mcp init *)",
+      "Bash(timeout 5 node dist/index.js)",
+      "Bash(node -e ' *)"
     ]
   }
 }

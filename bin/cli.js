@@ -155,6 +155,12 @@ ${c.bold("Setup complete!")}
     ${c.cyan("verify_ui")}               render @Preview + validate against ITGD standards
     ${c.cyan("fluidity_debug_workflow")}  full debug protocol with CLI commands
 
+  ${c.bold("Execution tools (4)")}
+    ${c.cyan("run_adb")}     execute any adb command
+    ${c.cyan("run_git")}     execute any git command
+    ${c.cyan("run_gradle")}  execute a gradle task (auto-detects ./gradlew)
+    ${c.cyan("run_bash")}    execute an arbitrary shell command
+
   ${c.bold("CLAUDE.md:")}
     To add/update the MCP block in any project:
     ${c.cyan("android-dev-mcp setup-claude-md")}
