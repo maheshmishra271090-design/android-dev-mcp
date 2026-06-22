@@ -68,8 +68,13 @@ ok "Git aliases configured (st, co, lg, pf, rbd, undo)"
 header "5/8 Checking Android CLI"
 if ! command -v android &>/dev/null; then
   warn "Installing Android CLI..."
-  curl -fsSL https://dl.google.com/android/android-cli/install.sh | bash 2>/dev/null \
-    || warn "Android CLI auto-install failed — download manually from https://developer.android.com/tools/agents"
+  if [ "$PLATFORM" = "mac" ]; then
+    (brew tap android/tap && brew trust --tap android/tap && brew install android-cli) 2>/dev/null \
+      || warn "Android CLI auto-install failed — download manually from https://developer.android.com/tools/agents/android-cli/download"
+  else
+    curl -fsSL https://dl.google.com/android/cli/latest/linux_x86_64/install.sh | bash 2>/dev/null \
+      || warn "Android CLI auto-install failed — download manually from https://developer.android.com/tools/agents/android-cli/download"
+  fi
 fi
 if command -v android &>/dev/null; then
   ok "Android CLI $(android --version 2>/dev/null || echo 'installed')"

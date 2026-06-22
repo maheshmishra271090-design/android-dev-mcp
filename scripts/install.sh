@@ -120,8 +120,19 @@ if command -v android &>/dev/null; then
   ANDROID_CLI_OK=true
 else
   log "Attempting to install Android CLI..."
-  if curl -fsSL https://dl.google.com/android/android-cli/install.sh | bash 2>/dev/null; then
-    # Reload PATH in case install script added a new location
+  ANDROID_CLI_INSTALLED=false
+  if [ "$PLATFORM" = "mac" ]; then
+    if brew tap android/tap 2>/dev/null && brew trust --tap android/tap 2>/dev/null && brew install android-cli 2>/dev/null; then
+      ANDROID_CLI_INSTALLED=true
+    fi
+  else
+    if curl -fsSL https://dl.google.com/android/cli/latest/linux_x86_64/install.sh | bash 2>/dev/null; then
+      ANDROID_CLI_INSTALLED=true
+    fi
+  fi
+
+  if [ "$ANDROID_CLI_INSTALLED" = true ]; then
+    # Reload PATH in case install added a new location
     export PATH="$PATH:$HOME/.local/bin:/usr/local/bin"
     if command -v android &>/dev/null; then
       ok "Android CLI installed: $(android --version 2>/dev/null || echo 'ok')"
@@ -132,7 +143,7 @@ else
     fi
   else
     warn "Android CLI auto-install failed."
-    warn "Install manually from: https://developer.android.com/tools/agents"
+    warn "Install manually from: https://developer.android.com/tools/agents/android-cli/download"
     warn "Knowledge tools (14) still work — CLI tools will be disabled until Android CLI is available."
   fi
 fi
