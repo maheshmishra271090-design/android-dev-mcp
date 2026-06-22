@@ -1,6 +1,6 @@
 {
   "name": "@maheshmishra271090-design/android-dev-mcp",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Unified MCP server for Android development — combines project knowledge, Android CLI execution, live dependency versions, and agentic workflow tools for Claude Code.",
   "main": "dist/index.js",
   "bin": {

@@ -45,14 +45,14 @@ function loadKnowledge(file) {
     return fs.existsSync(fp) ? fs.readFileSync(fp, "utf-8")
         : `[Knowledge file '${file}' not found. Add it to /knowledge/]`;
 }
-function runCLI(command, cwd) {
+function runShell(fullCommand, cwd) {
     try {
         const opts = {
             encoding: "utf-8",
             timeout: 30000,
             cwd: cwd ?? process.cwd(),
         };
-        const stdout = (0, child_process_1.execSync)(`android ${command}`, opts);
+        const stdout = (0, child_process_1.execSync)(fullCommand, opts);
         return { stdout: stdout.trim() };
     }
     catch (e) {
@@ -62,14 +62,26 @@ function runCLI(command, cwd) {
         };
     }
 }
-function androidCLIAvailable() {
+function runCLI(command, cwd) {
+    return runShell(`android ${command}`, cwd);
+}
+function binAvailable(bin) {
     try {
-        (0, child_process_1.execSync)("which android", { encoding: "utf-8" });
+        (0, child_process_1.execSync)(`which ${bin}`, { encoding: "utf-8" });
         return true;
     }
     catch {
         return false;
     }
+}
+function androidCLIAvailable() { return binAvailable("android"); }
+function adbAvailable() { return binAvailable("adb"); }
+function gitAvailable() { return binAvailable("git"); }
+function gradleInvocation(cwd) {
+    const dir = cwd ?? process.cwd();
+    const wrapper = process.platform === "win32" ? "gradlew.bat" : "./gradlew";
+    const wrapperPath = path.join(dir, process.platform === "win32" ? "gradlew.bat" : "gradlew");
+    return fs.existsSync(wrapperPath) ? wrapper : "gradle";
 }
 // ─── SERVER ──────────────────────────────────────────────────
 const server = new index_js_1.Server({ name: "android-dev-mcp", version: "1.0.0" }, { capabilities: { tools: {} } });
@@ -213,6 +225,54 @@ server.setRequestHandler(types_js_1.ListToolsRequestSchema, async () => ({
                         type: "string",
                         description: "Optional working directory (project root). Defaults to current directory.",
                     },
+                },
+                required: ["command"],
+            },
+        },
+        {
+            name: "run_adb",
+            description: "Executes an adb command and returns stdout. Use for: adb shell, adb logcat, adb pull/push, adb devices, adb install, adb dumpsys, etc. Requires adb on PATH.",
+            inputSchema: {
+                type: "object",
+                properties: {
+                    command: { type: "string", description: "The adb sub-command and args, e.g. 'shell dumpsys gfxinfo com.example reset' or 'devices'." },
+                    cwd: { type: "string", description: "Optional working directory. Defaults to current directory." },
+                },
+                required: ["command"],
+            },
+        },
+        {
+            name: "run_git",
+            description: "Executes a git command and returns stdout. Use for: git status, diff, log, add, commit, branch, push, etc. Requires git on PATH.",
+            inputSchema: {
+                type: "object",
+                properties: {
+                    command: { type: "string", description: "The git sub-command and args, e.g. 'status' or 'commit -m \"feat: add X\"'." },
+                    cwd: { type: "string", description: "Optional working directory (repo root). Defaults to current directory." },
+                },
+                required: ["command"],
+            },
+        },
+        {
+            name: "run_gradle",
+            description: "Executes a Gradle command and returns stdout. Uses ./gradlew if present in cwd, otherwise falls back to the global 'gradle' binary. Use for: build, assembleDebug, test, lint, dependencies, etc.",
+            inputSchema: {
+                type: "object",
+                properties: {
+                    command: { type: "string", description: "The gradle task and args, e.g. 'assembleDebug' or 'test --tests PlayerViewModelTest'." },
+                    cwd: { type: "string", description: "Optional project directory (where gradlew lives). Defaults to current directory." },
+                },
+                required: ["command"],
+            },
+        },
+        {
+            name: "run_bash",
+            description: "Executes an arbitrary shell command and returns stdout/stderr. Use for anything not covered by run_adb/run_git/run_gradle/run_android_cli.",
+            inputSchema: {
+                type: "object",
+                properties: {
+                    command: { type: "string", description: "The full shell command to execute." },
+                    cwd: { type: "string", description: "Optional working directory. Defaults to current directory." },
                 },
                 required: ["command"],
             },
@@ -425,6 +485,56 @@ server.setRequestHandler(types_js_1.CallToolRequestSchema, async (request) => {
             const output = result.error
                 ? `## Command: android ${command}\n\n### Output\n${result.stdout}\n\n### Error\n${result.error}`
                 : `## Command: android ${command}\n\n### Output\n\`\`\`\n${result.stdout}\n\`\`\``;
+            return { content: [{ type: "text", text: output }] };
+        }
+        case "run_adb": {
+            const command = a.command;
+            if (!command)
+                return { content: [{ type: "text", text: "Error: command parameter is required." }], isError: true };
+            if (!adbAvailable()) {
+                return { content: [{ type: "text", text: "## adb Not Found\nInstall the Android SDK platform-tools and ensure `adb` is on your PATH." }], isError: true };
+            }
+            const result = runShell(`adb ${command}`, a.cwd);
+            const output = result.error
+                ? `## Command: adb ${command}\n\n### Output\n${result.stdout}\n\n### Error\n${result.error}`
+                : `## Command: adb ${command}\n\n### Output\n\`\`\`\n${result.stdout}\n\`\`\``;
+            return { content: [{ type: "text", text: output }] };
+        }
+        case "run_git": {
+            const command = a.command;
+            if (!command)
+                return { content: [{ type: "text", text: "Error: command parameter is required." }], isError: true };
+            if (!gitAvailable()) {
+                return { content: [{ type: "text", text: "## git Not Found\nInstall git and ensure it's on your PATH." }], isError: true };
+            }
+            const result = runShell(`git ${command}`, a.cwd);
+            const output = result.error
+                ? `## Command: git ${command}\n\n### Output\n${result.stdout}\n\n### Error\n${result.error}`
+                : `## Command: git ${command}\n\n### Output\n\`\`\`\n${result.stdout}\n\`\`\``;
+            return { content: [{ type: "text", text: output }] };
+        }
+        case "run_gradle": {
+            const command = a.command;
+            if (!command)
+                return { content: [{ type: "text", text: "Error: command parameter is required." }], isError: true };
+            const invocation = gradleInvocation(a.cwd);
+            if (invocation === "gradle" && !binAvailable("gradle")) {
+                return { content: [{ type: "text", text: "## Gradle Not Found\nNo ./gradlew wrapper in cwd and no global `gradle` on PATH." }], isError: true };
+            }
+            const result = runShell(`${invocation} ${command}`, a.cwd);
+            const output = result.error
+                ? `## Command: ${invocation} ${command}\n\n### Output\n${result.stdout}\n\n### Error\n${result.error}`
+                : `## Command: ${invocation} ${command}\n\n### Output\n\`\`\`\n${result.stdout}\n\`\`\``;
+            return { content: [{ type: "text", text: output }] };
+        }
+        case "run_bash": {
+            const command = a.command;
+            if (!command)
+                return { content: [{ type: "text", text: "Error: command parameter is required." }], isError: true };
+            const result = runShell(command, a.cwd);
+            const output = result.error
+                ? `## Command: ${command}\n\n### Output\n${result.stdout}\n\n### Error\n${result.error}`
+                : `## Command: ${command}\n\n### Output\n\`\`\`\n${result.stdout}\n\`\`\``;
             return { content: [{ type: "text", text: output }] };
         }
         case "get_live_versions": {

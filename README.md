@@ -54,8 +54,9 @@ One MCP server that gives Claude Code both the knowledge **and** the execution p
 |---|---|---|
 | **Knowledge** | 14 | MVVM, Hilt, Compose, ExoPlayer, Retrofit, tests, git, prompts, model routing |
 | **Android CLI** | 5 | Scaffold, lint, render @Preview, deploy APK, live dep versions |
+| **Execution** | 4 | Direct adb, git, gradle, and shell command execution |
 
-## Tools (19 total)
+## Tools (23 total)
 
 ### Knowledge Layer (14)
 | Tool | Returns |
@@ -86,6 +87,14 @@ One MCP server that gives Claude Code both the knowledge **and** the execution p
 | `fluidity_debug_workflow` | Full debug protocol: ADB + layout tree + screenshot + ACR + lint |
 
 *Requires Android Studio running with Gemini signed in.
+
+### Execution Layer (4)
+| Tool | What it does |
+|---|---|
+| `run_adb` | Executes any `adb` command, returns stdout |
+| `run_git` | Executes any `git` command, returns stdout |
+| `run_gradle` | Executes a Gradle task — uses `./gradlew` if present, else global `gradle` |
+| `run_bash` | Executes an arbitrary shell command, returns stdout/stderr |
 
 ## Agentic Workflows
 
