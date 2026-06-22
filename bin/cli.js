@@ -127,11 +127,36 @@ if (command === "start") {
   }
 
   if (config.mcpServers[MCP_NAME]) {
-    console.log(c.yellow(`'${MCP_NAME}' already configured. No changes made.`));
+    console.log(c.yellow(`'${MCP_NAME}' already configured in Claude Desktop config. No changes made.`));
   } else {
     config.mcpServers[MCP_NAME] = mcpEntry;
     fs.writeFileSync(CLAUDE_CONFIG, JSON.stringify(config, null, 2));
-    console.log(c.green(`✔ Added '${MCP_NAME}' to Claude config`));
+    console.log(c.green(`✔ Added '${MCP_NAME}' to Claude Desktop config`));
+  }
+
+  // Claude Code (CLI / VSCode extension) reads its own config, not
+  // claude_desktop_config.json — register there too via `claude mcp add`.
+  const claudeCodeAvailable = (() => {
+    try { execSync("command -v claude", { stdio: "ignore" }); return true; }
+    catch { return false; }
+  })();
+
+  if (claudeCodeAvailable) {
+    try {
+      execSync(`claude mcp get ${MCP_NAME}`, { stdio: "pipe" });
+      console.log(c.yellow(`'${MCP_NAME}' already configured in Claude Code. No changes made.`));
+    } catch {
+      try {
+        execSync(`claude mcp add ${MCP_NAME} -- node "${SERVER_ENTRY}"`, { stdio: "inherit" });
+        console.log(c.green(`✔ Added '${MCP_NAME}' to Claude Code`));
+      } catch (e) {
+        console.log(c.yellow(`⚠ Could not auto-register with Claude Code: ${e.message}`));
+        console.log(c.cyan(`  Run manually: claude mcp add ${MCP_NAME} -- node "${SERVER_ENTRY}"`));
+      }
+    }
+  } else {
+    console.log(c.yellow("⚠ 'claude' CLI not found on PATH — skipping Claude Code registration."));
+    console.log(c.cyan(`  If you use Claude Code, run manually: claude mcp add ${MCP_NAME} -- node "${SERVER_ENTRY}"`));
   }
 
   // Auto-run CLAUDE.md setup in current directory
