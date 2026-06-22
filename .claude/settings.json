@@ -24,7 +24,14 @@
       "Bash(android-dev-mcp --help)",
       "Bash(android-dev-mcp init *)",
       "Bash(timeout 5 node dist/index.js)",
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "Bash(npm ls *)",
+      "Bash(ls /Users/pushpeetsingh/AndroidStudioProjects/mcp_test 2>/dev/null | head -20)",
+      "Read(//Users/pushpeetsingh/AndroidStudioProjects/mcp_test/**)",
+      "Bash(android-dev-mcp setup-claude-md *)",
+      "Bash(ls -la /Users/pushpeetsingh/.git 2>&1 | head -5; echo ---; ls -la /Users/pushpeetsingh/AndroidStudioProjects/mcp_test/.git 2>&1; echo ---; ls -la /Users/pushpeetsingh/AndroidStudioProjects/.git 2>&1)",
+      "Read(//Users/pushpeetsingh/.git/**)",
+      "Read(//Users/pushpeetsingh/AndroidStudioProjects/**)"
     ]
   }
 }
