@@ -14,9 +14,11 @@ That's it. No cloning, no manual steps. The installer handles everything:
 - Git + ITGD aliases
 - Android CLI + Google Android Skills
 - android-dev-mcp global npm package
-- Claude Code MCP config
+- MCP config for **Claude Code** (via `claude mcp add`) and **Claude Desktop** (via `claude_desktop_config.json`)
 - CLAUDE.md block in current project
 - Git hooks (pre-commit lint + commit-msg Conventional Commits)
+
+`android-dev-mcp init` registers the server in both places it can be used — the `claude` CLI's own MCP config (for Claude Code / the VSCode extension) and `claude_desktop_config.json` (for the Claude Desktop app). If the `claude` CLI isn't on `PATH`, Claude Code registration is skipped with a warning and the manual command to run instead (see below).
 
 ### After install — verify
 
@@ -31,9 +33,40 @@ android-dev-mcp check
   CLAUDE.md (cwd):     ✔  block present
 ```
 
-Then inside Claude Code:
+```bash
+claude mcp get android-dev-mcp
 ```
-/mcp   → should show android-dev-mcp with 19 tools
+
+```
+android-dev-mcp:
+  Status: ✔ Connected
+  Type: stdio
+  Command: node
+  Args: <path-to-package>/dist/index.js
+```
+
+Then inside Claude Code, **start a new session** (registration only takes effect on session start):
+```
+/mcp   → should show android-dev-mcp with 24 tools
+```
+
+### Manual registration (Claude Code)
+
+If `init` reports it couldn't find the `claude` CLI, or you're setting this up without the installer, register it directly:
+
+```bash
+claude mcp add android-dev-mcp -- node "$(npm root -g)/@maheshmishra271090-design/android-dev-mcp/dist/index.js"
+```
+
+Or, when working from a local clone/checkout of this repo:
+```bash
+npm run build
+claude mcp add android-dev-mcp -- node "$(pwd)/dist/index.js"
+```
+
+Remove it with:
+```bash
+claude mcp remove android-dev-mcp -s local
 ```
 
 ---
