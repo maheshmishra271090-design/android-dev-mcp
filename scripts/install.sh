@@ -23,7 +23,6 @@ RED="\033[0;31m"; CYAN="\033[0;36m"; RESET="\033[0m"
 DIM="\033[2m"
 
 PACKAGE="@maheshmishra271090-design/android-dev-mcp"
-REGISTRY="https://npm.pkg.github.com"
 MCP_NAME="android-dev-mcp"
 
 log()    { echo -e "${CYAN}[android-dev-mcp]${RESET} $1"; }
@@ -149,45 +148,12 @@ fi
 # ─── 6. INSTALL android-dev-mcp VIA NPM ─────────────────────
 header "6/9  Installing android-dev-mcp"
 
-# Configure npm for GitHub Packages (uses GITHUB_TOKEN env var if set, else prompts)
-NPM_RC="$HOME/.npmrc"
-REGISTRY_LINE="//npm.pkg.github.com/:_authToken"
-SCOPE_LINE="@maheshmishra271090-design:registry=https://npm.pkg.github.com"
-
-if ! grep -q "$SCOPE_LINE" "$NPM_RC" 2>/dev/null; then
-  if [ -n "$GITHUB_TOKEN" ]; then
-    log "Using GITHUB_TOKEN from environment..."
-    echo "$REGISTRY_LINE=$GITHUB_TOKEN" >> "$NPM_RC"
-    echo "$SCOPE_LINE" >> "$NPM_RC"
-    ok "GitHub Packages auth configured"
-  else
-    echo ""
-    echo -e "${YELLOW}  GitHub Packages requires a personal access token with read:packages scope.${RESET}"
-    echo -e "${DIM}  Create one at: https://github.com/settings/tokens${RESET}"
-    echo ""
-    read -r -p "  Enter your GitHub token (or press Enter to skip): " GH_TOKEN
-    echo ""
-    if [ -n "$GH_TOKEN" ]; then
-      echo "$REGISTRY_LINE=$GH_TOKEN" >> "$NPM_RC"
-      echo "$SCOPE_LINE" >> "$NPM_RC"
-      ok "GitHub Packages auth configured in ~/.npmrc"
-    else
-      warn "Skipping token — using public npm registry fallback"
-      # Fallback: try public npm if package is also published there
-      REGISTRY="https://registry.npmjs.org"
-    fi
-  fi
-else
-  ok "GitHub Packages already configured in ~/.npmrc"
-fi
-
 log "Installing $PACKAGE globally..."
-if npm install -g "$PACKAGE" --registry "$REGISTRY" 2>/dev/null; then
+if npm install -g "$PACKAGE"; then
   ok "$PACKAGE installed globally"
 else
-  fail "npm install failed. Check your token and try manually:"
+  fail "npm install failed. Try manually:"
   echo "    npm install -g $PACKAGE"
-  echo "    See README for auth setup: https://github.com/maheshmishra271090-design/android-dev-mcp"
   exit 1
 fi
 

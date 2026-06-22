@@ -18,14 +18,6 @@ That's it. No cloning, no manual steps. The installer handles everything:
 - CLAUDE.md block in current project
 - Git hooks (pre-commit lint + commit-msg Conventional Commits)
 
-### With a GitHub token (for private packages)
-
-```bash
-GITHUB_TOKEN=your_token curl -fsSL https://raw.githubusercontent.com/maheshmishra271090-design/android-dev-mcp/main/scripts/install.sh | bash
-```
-
-The installer prompts for a token if one isn't in the environment. Token needs `read:packages` scope.
-
 ### After install — verify
 
 ```bash
